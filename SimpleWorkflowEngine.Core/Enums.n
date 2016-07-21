@@ -1,0 +1,20 @@
+﻿using System;
+
+namespace SimpleWorkflowEngine.Core
+{
+    [Serializable]
+    public enum LogicOperand
+    {
+        |And
+        |Or
+    }
+    
+    [Serializable]
+    public enum StepState
+    {
+        |Waiting
+        |Active
+        |Completed
+        |Skipped
+    }
+}

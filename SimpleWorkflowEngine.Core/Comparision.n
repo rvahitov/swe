@@ -1,0 +1,33 @@
+﻿using Nemerle;
+using Nemerle.Collections;
+using Nemerle.Assertions;
+using Nemerle.Utility;
+
+using System;
+using SCG = System.Collections.Generic;
+
+namespace SimpleWorkflowEngine.Core
+{
+    class FuncEqualityComparer[T]:SCG.IEqualityComparer[T]
+    {
+        _equals:T*T->bool;
+        _getHashCode:T->int;
+        
+        public this([NotNull]equals:T*T->bool,[NotNull]getHashCode:T->int)
+        {
+            _equals = equals;
+            _getHashCode = getHashCode;
+        }
+        
+        public Equals(left:T, right:T):bool
+        {
+            _equals(left,right);
+        }
+        
+        [NotImplemented]
+        public GetHashCode(obj:T):int
+        {
+            _getHashCode(obj);
+        }
+    }
+}

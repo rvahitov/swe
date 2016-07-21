@@ -1,0 +1,79 @@
+﻿using Nemerle;
+using Nemerle.Collections;
+using Nemerle.Assertions;
+using Nemerle.Utility;
+
+using System;
+using SCG = System.Collections.Generic;
+using System.Runtime.Serialization;
+using SWE.Utils;
+
+namespace SimpleWorkflowEngine.Core
+{
+    [Serializable,Record]
+    public class FlagsGroup : ISerializable
+    {
+        [Accessor]
+        _id:string;
+        [Accessor]
+        _logicOperand:LogicOperand;
+        _flags:Hashtable[string,bool];
+
+        public this(info:SerializationInfo, context:StreamingContext)
+        {
+            _ = context;
+            _id = info.GetString(nameof(this._id));
+            _logicOperand = info.GetValue(nameof(this._logicOperand),typeof(LogicOperand)):>LogicOperand;
+            _flags = info.GetValue(nameof(this._flags),typeof(Hashtable[string,bool])):>Hashtable[string,bool];
+        }
+
+        public this([NotNull]id:string,logicOperand:LogicOperand = LogicOperand.And,flags:SCG.IDictionary[string,bool] = null)
+        {
+            _id = id; _logicOperand = logicOperand;
+            _flags = Hashtable();
+            unless(flags == null)
+            {
+                foreach(entry in flags)
+                {
+                    _flags.Add(entry.Key,entry.Value);
+                }
+            }
+        }
+
+        public AddFlag([NotNull]flag:string, value:bool = false):void
+        {
+            if(_flags.ContainsKey(flag)) throw FlagAllReadyExistsException(flag)
+            else _flags.Add(flag,value);
+        }
+
+        public SetFlag([NotNull]flag:string):void
+        {
+            if(_flags.ContainsKey(flag)) _flags[flag] = true else throw FlagNotExistsException(flag)
+        }
+
+        public Flags:SCG.IReadOnlyDictionary[string,bool]
+        {
+            get{_flags}
+        }
+
+        public FlagsMeetLogic:bool
+        {
+            get
+            {
+                match(_logicOperand)
+                {
+                    |LogicOperand.And       => ! _flags.Values.Exists(v => v == false)
+                    |LogicOperand.Or        =>   _flags.Values.Exists(v => v == true);
+                }
+            }
+        }
+
+        public GetObjectData(info:SerializationInfo, context:StreamingContext):void
+        {
+            _ = context;
+            info.AddValue(nameof(this._id),_id);
+            info.AddValue(nameof(this._logicOperand),_logicOperand);
+            info.AddValue(nameof(this._flags), _flags);
+        }
+    }
+}

@@ -1,0 +1,100 @@
+﻿using Nemerle;
+using Nemerle.Collections;
+using Nemerle.Text;
+using Nemerle.Utility;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace SimpleWorkflowEngine.Core
+{
+    [Record]
+    public class WorkflowEngineException:Exception
+    {
+    }
+    
+    public class FlagAllReadyExistsException:WorkflowEngineException
+    {
+        [Accessor]
+        _flag:string;
+        public this(flag:string)
+        {
+            base($"Flag '$flag' allready exists.");
+            _flag = flag
+        }
+        public this(message:string, flag:string)
+        {
+            base(message);
+            _flag = flag
+        }
+        public this(message:string, innerException:Exception, flag:string)
+        {
+            base(message,innerException);
+            _flag = flag
+        }
+    }
+    
+    public class FlagNotExistsException: WorkflowEngineException
+    {
+        [Accessor]
+        _flag:string;
+        public this(flag:string)
+        {
+            base($"Flag '$flag' is not exists.");
+            _flag = flag
+        }
+        public this(message:string, flag:string)
+        {
+            base(message);
+            _flag = flag
+        }
+        public this(message:string, innerException:Exception, flag:string)
+        {
+            base(message,innerException);
+            _flag = flag
+        }
+    }
+    
+    public class FlagsGroupAllredyExists : WorkflowEngineException
+    {
+        [Accessor]
+        _flagsGroup:string;
+        public this(flagsGroup:string)
+        {
+            base($"Flags group '$flagsGroup' allready exists.");
+            _flagsGroup = flagsGroup
+        }
+        public this(message:string, flagsGroup:string)
+        {
+            base(message);
+            _flagsGroup = flagsGroup
+        }
+        public this(message:string, innerException:Exception, flagsGroup:string)
+        {
+            base(message,innerException);
+            _flagsGroup = flagsGroup
+        }
+    }
+   
+    public class FlagsGroupNotExistsException: WorkflowEngineException
+    {
+        [Accessor]
+        _flagsGroup:string;
+        public this(flagsGroup:string)
+        {
+            base($"Flags group '$flagsGroup' is not exists.");
+            _flagsGroup = flagsGroup
+        }
+        public this(message:string, flagsGroup:string)
+        {
+            base(message);
+            _flagsGroup = flagsGroup
+        }
+        public this(message:string, innerException:Exception, flagsGroup:string)
+        {
+            base(message,innerException);
+            _flagsGroup = flagsGroup
+        }
+    }
+}

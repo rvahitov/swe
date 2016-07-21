@@ -1,0 +1,35 @@
+﻿using Nemerle;
+using Nemerle.Collections;
+using Nemerle.Compiler;
+using Nemerle.Compiler.Parsetree;
+using Nemerle.Compiler.Typedtree;
+using Nemerle.Text;
+using Nemerle.Utility;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+
+namespace SWE.Utils
+{
+    macro nameof(item : PExpr)
+    {
+        NameOfImpl.DoTransform(Macros.ImplicitCTX(), item)
+    }
+
+    module NameOfImpl
+    {
+        public DoTransform(typer : Typer, item : PExpr) : PExpr
+        {
+            Macros.DefineCTX(typer);
+            match(item)
+            {
+//                | <[$(n:name)]>        => <[$(n.Id : string)]>
+                | PExpr.Member(_,mem)  => <[$(mem.GetName().Id : string)]>
+                | PExpr.Ref(name)      => <[$(name.Id : string)]>
+                |_                     => Message.Error("Invalid using 'nameof'"); <[]>
+            }
+        }
+    }
+}

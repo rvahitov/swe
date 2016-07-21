@@ -1,0 +1,113 @@
+﻿using Nemerle;
+using Nemerle.Collections;
+using Nemerle.Assertions;
+using Nemerle.Extensions;
+using Nemerle.Utility;
+
+using System;
+using SCG = System.Collections.Generic;
+using System.Runtime.Serialization;
+using SWE.Utils;
+
+namespace SimpleWorkflowEngine.Core
+{
+    [Serializable]
+    public class Transition : ISerializable
+    {
+        [Accessor]
+        _fromStep:string;
+        [Accessor]
+        _toStep:string;
+        _groups:Hashtable[string,FlagsGroup];
+        [Accessor]
+        _transitionOperand:LogicOperand;
+        
+        public this([NotNull]fromStep:string, [NotNull]toStep:string, transitionOperand:LogicOperand = LogicOperand.And)
+        {
+            _fromStep = fromStep;
+            _toStep = toStep;
+            _transitionOperand = transitionOperand;
+            _groups = Hashtable();
+        }
+        public this(info:SerializationInfo, context:StreamingContext)
+        {
+            _ = context;
+            _fromStep = info.GetString(nameof(this._fromStep));
+            _toStep = info.GetString(nameof(this._toStep));
+            _transitionOperand = info.GetValue(nameof(this._transitionOperand), typeof(LogicOperand)) :> LogicOperand;
+            _groups = info.GetValue(nameof(this._flags), typeof(Hashtable[string,FlagsGroup])) :> Hashtable[string,FlagsGroup];
+        }
+        
+        public FlagsGroups:Seq[FlagsGroup]{get{_groups.Values}}
+        
+        public GetObjectData(info:SerializationInfo, context:StreamingContext):void
+        {
+            _ = context;
+            info.AddValue(nameof(this._fromStep),_fromStep);
+            info.AddValue(nameof(this._toStep), _toStep);
+            info.AddValue(nameof(this._transitionOperand),_transitionOperand);
+            info.AddValue(nameof(this._flags), _groups);
+        }
+        
+        public NewFlagsGroup([NotNull]id:string,logicOperand:LogicOperand = LogicOperand.And):FlagsGroup
+        {
+            when(_groups.ContainsKey(id))
+            {
+                throw FlagsGroupAllredyExists(id)
+            }
+            def fg = FlagsGroup(id,logicOperand);
+            _groups.Add(fg.Id,fg);
+            fg
+        }
+        
+        public AddFlagsGroup([NotNull]flagsGroup:FlagsGroup):void
+        {
+            when(_groups.ContainsKey(flagsGroup.Id))
+            {
+                throw FlagsGroupAllredyExists(flagsGroup.Id)
+            }
+            _groups.Add(flagsGroup.Id,flagsGroup);
+        }
+        
+        public RemoveFlagsGroup([NotNull]id:string):bool
+        {
+            if(_groups.ContainsKey(id))
+            {
+                _groups.Remove(id);
+                true;
+            }
+            else
+            {
+                false
+            }
+        }
+        
+        public ContainsFlag([NotNull]flag:string):bool
+        {
+            _groups.Values.Exists(fg => fg.Flags.ContainsKey(flag))
+        }
+        
+        public SetFlag([NotNull]flag:string):void
+        {
+            def groups = _groups.Values.Filter(fg => fg.Flags.ContainsKey(flag));
+            when(groups.Length == 0)
+            {
+                throw FlagNotExistsException(flag);
+            }
+            foreach(fg in groups)
+            {
+                fg.SetFlag(flag)
+            }
+        }
+        
+        public FlagsMeetLogic():bool
+        {
+            def values = _groups.Values.Map(fg => fg.FlagsMeetLogic);
+            match(_transitionOperand)
+            {
+                |LogicOperand.And       => !values.Contains(false)
+                |LogicOperand.Or        =>  values.Contains(true)
+            }
+        }
+    }
+}

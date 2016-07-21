@@ -1,0 +1,41 @@
+﻿using Nemerle;
+using Nemerle.Extensions;
+using Nemerle.Utility;
+
+using System;
+using System.Runtime.Serialization;
+using SWE.Utils;
+
+namespace SimpleWorkflowEngine.Core
+{
+    [Record, Serializable]
+    public class Step : ISerializable
+    {
+        [Accessor]
+        _id:string;
+        [Accessor]
+        _state:StepState;
+        [Accessor]
+        _activateOperand:LogicOperand;
+        
+        public this(info:SerializationInfo, context:StreamingContext)
+        {
+            _ = context;
+            _id = info.GetString(nameof(this._id));
+            _state = info.GetValue(nameof(this._state), typeof(StepState)) :> StepState;
+            _activateOperand = info.GetValue(nameof(this._activateOperand), typeof(LogicOperand)) :> LogicOperand;
+        }
+        
+        public IsCompleted:bool { get {_state == StepState.Completed} }
+        
+        public IsActive: bool {get {_state == StepState.Active } }
+        
+        public GetObjectData(info:SerializationInfo, context:StreamingContext):void
+        {
+            _ = context;
+            info.AddValue(nameof(this._id),_id);
+            info.AddValue(nameof(this._state),_state);
+            info.AddValue(nameof(this._activateOperand),_activateOperand);
+        }
+    }
+}
