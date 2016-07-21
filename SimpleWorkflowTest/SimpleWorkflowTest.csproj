@@ -42,7 +42,7 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="Volante">
-      <HintPath>D:\Volante-0.9\Volante.dll</HintPath>
+      <HintPath>..\libs\Volante-0.9\Volante.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
